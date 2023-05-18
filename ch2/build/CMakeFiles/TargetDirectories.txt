@@ -1,6 +1,0 @@
-/home/lee/Resources/slam14/ch2/build/CMakeFiles/rebuild_cache.dir
-/home/lee/Resources/slam14/ch2/build/CMakeFiles/edit_cache.dir
-/home/lee/Resources/slam14/ch2/build/CMakeFiles/hello_shared.dir
-/home/lee/Resources/slam14/ch2/build/CMakeFiles/gdbTest.dir
-/home/lee/Resources/slam14/ch2/build/CMakeFiles/useHello.dir
-/home/lee/Resources/slam14/ch2/build/CMakeFiles/helloSLAM.dir

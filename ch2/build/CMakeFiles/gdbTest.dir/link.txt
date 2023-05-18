@@ -1,1 +1,0 @@
-/usr/bin/c++  -g  -rdynamic CMakeFiles/gdbTest.dir/gdbTest.cpp.o  -o gdbTest 
