@@ -15,41 +15,47 @@ typedef vector<Sophus::SE3d, Eigen::aligned_allocator<Sophus::SE3d>> TrajectoryT
 const string groundtruth_file = "../data/groundtruth.txt";
 const string estimated_file = "../data/estimated.txt";
 
-// 绘制gt和esti路径
+// 绘制gt和esti路径; 不修改变量的值加入const; 使用引用避免变量的复制
 void DrawTrajectory(const TrajectoryType &gt, const TrajectoryType &esti);
 
 // 读取文件中的轨迹并保存
-TrajectoryType ReadTrajectory(const string &filepath);       // TODO: 这里为啥是传指针, 理解string数据结构！
+TrajectoryType ReadTrajectory(const string &filepath);
 
 
 int main (int argv, char **argc) {
-    /// read trajectory from file
+    /// 从文件中读取轨迹
     TrajectoryType gt_trajectory = ReadTrajectory(groundtruth_file);
     TrajectoryType esti_trajectory = ReadTrajectory(estimated_file);
 
-    // TODO: assert的作用是什么
+    // assert的作用: 在debug模式下, 如果assert中的表达式不相等, 则程序停止运行，并输出错误信息
     assert(!gt_trajectory.empty() && !esti_trajectory.empty());
     assert(gt_trajectory.size() == esti_trajectory.size());
 
-    // cout << "size = " << gt_trajectory.size() << endl;
-    // cout << "size = " << esti_trajectory.size() << endl;
     // cout.precision(3);
+    // cout << "size = " << gt_trajectory.size() << endl;
     // cout << gt_trajectory[1].matrix() << endl;
-    // cout << esti_trajectory[1].matrix() << endl;
 
-    /// calculate rmse
-    double rmse = 0;
+    /// 根据两条轨迹计算rmse, rmse_all = sqrt (1/N * se3_error.norm^2)
+    double rmse_all = 0, rmse_trans = 0;
     for (int i = 0; i < gt_trajectory.size(); i++) {
         Sophus::SE3d SE3_error = gt_trajectory[i].inverse() * esti_trajectory[i];
-        double error = SE3_error.log().norm();
-        rmse += error * error;
+        // 计算位姿李代数的rmse
+        double error_all = SE3_error.log().norm();      
+        rmse_all += error_all * error_all;
+
+        // 计算trans部分的rmse
+        double error_trans = SE3_error.translation().norm();
+        rmse_trans += error_trans * error_trans;
     }
-    rmse = sqrt(rmse / double(gt_trajectory.size()));
+    
+    rmse_all = sqrt(rmse_all / double(gt_trajectory.size()));
+    cout << "rmse_all = " << rmse_all << endl;
 
-    cout << "rmse = " << rmse << endl;
+    rmse_trans = sqrt(rmse_trans / double(gt_trajectory.size()));
+    cout << "rmse_trans = " << rmse_trans << endl;
 
-    /// draw trajectory
-    DrawTrajectory(gt_trajectory, esti_trajectory);     // TODO: 这里为啥不传指针
+    /// 绘制两条轨迹
+    DrawTrajectory(gt_trajectory, esti_trajectory);
 
     return 0;
 }
@@ -76,8 +82,7 @@ TrajectoryType ReadTrajectory(const string &filepath) {
 }
 
 void DrawTrajectory(const TrajectoryType &gt, const TrajectoryType &esti) {
-    // 创建一个名为 "Trajectory Viewer" 的窗口，
-    // 并设置窗口的宽度为1024，高度为768
+    // 创建一个名为 "Trajectory Viewer" 的窗口
     pangolin::CreateWindowAndBind("Trajectory Viewer", 1024, 768);
     // 启用深度测试和混合功能
     glEnable(GL_DEPTH_TEST);
@@ -95,6 +100,7 @@ void DrawTrajectory(const TrajectoryType &gt, const TrajectoryType &esti) {
             .SetBounds(0.0, 1.0, 0.0, 1.0, -1024.0f / 768.0f)
             .SetHandler(new pangolin::Handler3D(s_cam));
 
+    // 绘制图像
     while (pangolin::ShouldQuit() == false) {
         // 清空颜色缓冲区和深度缓冲区
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
