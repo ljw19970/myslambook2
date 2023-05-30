@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(TrajectoryError)
-
 # 只有当编译模式为debug, C++代码中的assert才能起作用
 set(CMAKE_BUILD_TYPE "Debug")
+
+project(TrajectoryError)
 
 find_package(Sophus REQUIRED)
 find_package(Eigen3 REQUIRED)
